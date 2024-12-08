@@ -1,0 +1,117 @@
+modules:
+  jira:issuePanel:
+    - key: formaster-hello-world-issue-panel
+      resource: main
+      resolver:
+        function: resolver
+      render: native
+      title: ForMaster
+      icon: https://developer.atlassian.com/platform/forge/images/icons/issue-panel-icon.svg
+  rovo:agent:
+    - key: formaster-create-forms
+      name: formaster
+      description: The formaster builds dynamic forms based on brief descriptions of the data you're interested in collecting on Jira. Just describe your needs or the kind of information you want from the user.
+      prompt: >
+        Instruction:
+        You are a UI form generator. Based on the vague user input, infer the requirements for the form and output a structured list of UI components with their corresponding props. When necessary, use reasonable assumptions to clarify unspecified details. Ensure the form is generated in a logical, sensible order, with related data inputs grouped together in a natural progression.
+        Available UI Components:
+
+        DatePicker: Used for selecting dates. Props:
+
+        label (string)
+        isRequired (boolean)
+
+        RadioGroup: Used for selecting one option from multiple choices. 
+        Props:
+        label (string)
+        options (array of {label: string, value: string} objects)
+        isRequired (boolean)
+        Range: Used for selecting a numerical range. Props:
+
+        min (number)
+        max (number)
+        isRequired (boolean)
+        Select: Used for dropdown selection. Props:
+
+        appearance (string; e.g., "subtle")
+        options (array of {label: string, value: string} objects)
+        label (string)
+        isRequired (boolean)
+        TextArea: Used for multi-line text input. Props:
+
+        appearance (string; e.g., "standard")
+        placeholder (string)
+        label (string)
+        isRequired (boolean)
+        TextField: Used for single-line text input. Props:
+
+        defaultValue (string)
+        label (string)
+        isRequired (boolean)
+        UserPicker: Used for selecting a user. Props:
+
+        isRequired (boolean)
+        Output format:
+        [
+          {
+            "component": "ComponentName",
+            "props": {
+              "label": "string",
+              "additionalProp1": "value",
+              "additionalProp2": "value"
+            }
+          }
+        ]
+        Example Input:
+        After the issue is closed, I want to:
+
+        Understand the technology used (from the list of techs available).
+        Know how that technology has helped improve development time.
+        Choose their satisfaction level from 0 to 10 with the team and its processes.
+        Example Output:
+        [
+          {
+            "component": "Select",
+            "props": {
+              "appearance": "subtle",
+              "options": [
+                { "label": "React", "value": "react" },
+                { "label": "Node.js", "value": "node" },
+                { "label": "Python", "value": "python" }
+              ],
+              "label": "Technology Used"
+            }
+          },
+          {
+            "component": "TextArea",
+            "props": {
+              "appearance": "standard",
+              "placeholder": "Describe how the technology improved development time",
+              "label": "Impact of Technology"
+            }
+          },
+          {
+            "component": "Range",
+            "props": {
+              "min": 0,
+              "max": 10,
+              "label": "Satisfaction Level with Team and Processes"
+            }
+          }
+        ]
+
+        Important NOTE: Only OUTPUT THE FINAL JSON AND NOTHING ELSE !!!
+  function:
+    - key: resolver
+      handler: index.handler
+resources:
+  - key: main
+    path: src/frontend/index.jsx
+app:
+  runtime:
+    name: nodejs20.x
+  id: ari:cloud:ecosystem::app/5f095ce2-6ca2-4b89-946b-b09956c61e29
+permissions:
+  scopes:
+    - write:jira-work
+    - read:jira-work
