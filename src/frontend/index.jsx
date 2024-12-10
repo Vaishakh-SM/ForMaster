@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useState, useMemo, Fragment } from "react";
 import ForgeReconciler from "@forge/react";
 import api, { route } from "@forge/api";
 import {
@@ -6,11 +6,12 @@ import {
   Range,
   Button,
   ButtonGroup,
-  CheckBoxGroup,
+  CheckboxGroup,
   RadioGroup,
+  SectionMessage,
   Text,
   TextArea,
-  TextField,
+  Textfield,
   useForm,
   Select,
   DatePicker,
@@ -19,79 +20,66 @@ import {
   Stack,
   FormHeader,
   FormFooter,
-  useIssueProperty,
-  useProductContext,
+  Form,
+  Label,
   RequiredAsterisk,
 } from "@forge/react";
-
-import parseEmbeddedJSON from "./utils";
+import { invoke } from "@forge/bridge";
 
 const componentsMap = {
   Range,
   RadioGroup,
-  CheckBoxGroup,
+  CheckBoxGroup: CheckboxGroup,
   Select,
   DatePicker,
+  TextField: Textfield,
   TextArea,
-  TextField,
   UserPicker,
 };
 
-const RenderFromJSON = ({ componentData }) => {
-  const { component, props } = componentData;
-  const Component = componentsMap[component]; // Look up the component
-
-  if (!Component) {
-    return <div>Unknown component: {component}</div>;
-  }
-
-  return <Component {...props} />;
-};
-
 const App = () => {
-  const [issueFormText, setIssueFormText, deleteIssueFormText] =
-    useIssueProperty("issueForm", "");
-
-  const context = useProductContext();
+  const [issueFormText, setIssueFormText] = useState("");
+  const [done, setDone] = useState(false);
+  const [c, setC] = useState("");
+  invoke("getIssueProperty").then((key) => {
+    setIssueFormText(JSON.stringify(key));
+  });
 
   const onSubmit = (data) => {
-    const issueKey = context.platformContext.issueKey;
-    const bodyData = `{
-      "body": "${JSON.stringify(data)}",
-      "visibility": {
-        "identifier": "Administrators",
-        "type": "role",
-        "value": "Administrators"
-      }
-    }`;
-
-    const response = api
-      .asUser()
-      .requestJira(route`/rest/api/2/issue/${issueKey}/comment`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: bodyData,
-      });
+    invoke("addComment", { commentText: data }).then((resp) => {
+      setC(JSON.stringify(resp));
+      setDone(true);
+    });
   };
 
   const parsedIssueFormText = useMemo(() => {
-    return parseEmbeddedJSON(issueFormText);
+    if (issueFormText) {
+      return JSON.parse(issueFormText);
+    }
+    return "";
   }, [issueFormText]);
 
-  if (!parsedIssueFormText) {
-    return <></>;
-  }
   const { handleSubmit, register, getFieldId } = useForm();
+  if (done) {
+    return (
+      <SectionMessage appearance="success">
+        <Text> Your response has been recorded in the comments! 😇 {c}</Text>
+      </SectionMessage>
+    );
+  }
+
+  if (!parsedIssueFormText || parsedIssueFormText.length === 0) {
+    return (
+      <SectionMessage appearance="information">
+        <Text>No form available at the moment.</Text>
+      </SectionMessage>
+    );
+  }
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <FormHeader title="Dynamic Form">
-        <Text>
-          Required fields are marked with an asterisk. <RequiredAsterisk />
-        </Text>
+      <FormHeader title="Survey">
+        Required fields are marked with an asterisk. <RequiredAsterisk />
       </FormHeader>
 
       <FormSection>
@@ -123,11 +111,9 @@ const App = () => {
       </FormSection>
 
       <FormFooter>
-        <ButtonGroup>
-          <Button type="submit" appearance="primary">
-            Submit
-          </Button>
-        </ButtonGroup>
+        <Button type="submit" appearance="primary">
+          Submit
+        </Button>
       </FormFooter>
     </Form>
   );
