@@ -37,17 +37,28 @@ const componentsMap = {
   UserPicker,
 };
 
+function transformObject(obj) {
+  const result = {};
+  for (const key in obj) {
+    if (obj[key] && typeof obj[key] === "object" && "value" in obj[key]) {
+      result[key] = obj[key].value;
+    } else {
+      result[key] = obj[key];
+    }
+  }
+  return result;
+}
+
 const App = () => {
   const [issueFormText, setIssueFormText] = useState("");
   const [done, setDone] = useState(false);
-  const [c, setC] = useState("");
   invoke("getIssueProperty").then((key) => {
     setIssueFormText(JSON.stringify(key));
   });
 
   const onSubmit = (data) => {
-    invoke("addComment", { commentText: data }).then((resp) => {
-      setC(JSON.stringify(resp));
+    const text = transformObject(data);
+    invoke("addComment", { commentText: text }).then((resp) => {
       setDone(true);
     });
   };
@@ -63,7 +74,7 @@ const App = () => {
   if (done) {
     return (
       <SectionMessage appearance="success">
-        <Text> Your response has been recorded in the comments! 😇 {c}</Text>
+        <Text> Your response has been recorded in the comments! 😇</Text>
       </SectionMessage>
     );
   }
