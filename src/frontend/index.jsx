@@ -6,11 +6,12 @@ import {
   Range,
   Button,
   ButtonGroup,
-  CheckBoxGroup,
+  CheckboxGroup,
   RadioGroup,
   Text,
   TextArea,
-  TextField,
+  Textfield,
+  Form,
   useForm,
   Select,
   DatePicker,
@@ -22,18 +23,19 @@ import {
   useIssueProperty,
   useProductContext,
   RequiredAsterisk,
+  Label
 } from "@forge/react";
 
-import parseEmbeddedJSON from "./utils";
+import { parseEmbeddedJSON } from "./utils";
 
 const componentsMap = {
   Range,
   RadioGroup,
-  CheckBoxGroup,
+  CheckboxGroup,
   Select,
   DatePicker,
   TextArea,
-  TextField,
+  Textfield,
   UserPicker,
 };
 
@@ -50,7 +52,7 @@ const RenderFromJSON = ({ componentData }) => {
 
 const App = () => {
   const [issueFormText, setIssueFormText, deleteIssueFormText] =
-    useIssueProperty("issueForm", "");
+    useIssueProperty("issueForm", 'asfd');
 
   const context = useProductContext();
 
@@ -78,9 +80,34 @@ const App = () => {
   };
 
   const parsedIssueFormText = useMemo(() => {
-    return parseEmbeddedJSON(issueFormText);
+    //return parseEmbeddedJSON(issueFormText);
   }, [issueFormText]);
 
+
+
+  const testInput = `
+  [
+    {
+      "component": "Select",
+      "props": {
+        "appearance": "subtle",
+        "options": [
+          { "label": "React", "value": "react" },
+          { "label": "Node.js", "value": "node" },
+          { "label": "Python", "value": "python" }
+        ],
+        "label": "Technology Used"
+      }
+    }
+  ]
+  `;
+
+  const updateIssueProperty = async () => {
+    await setIssueFormText(testInput);
+  };
+
+  // const parsedIssueFormText = parseEmbeddedJSON(issueFormText);
+  
   if (!parsedIssueFormText) {
     return <></>;
   }
@@ -89,12 +116,14 @@ const App = () => {
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
       <FormHeader title="Dynamic Form">
+      {/* <Button onClick={updateIssueProperty}>{`Random number: ${issueFormText}`}</Button> */}
         <Text>
+          {issueFormText}
           Required fields are marked with an asterisk. <RequiredAsterisk />
         </Text>
       </FormHeader>
 
-      <FormSection>
+      {/* <FormSection>
         <Stack space="space.200">
           {parsedIssueFormText.map((field, index) => {
             const { component, props } = field;
@@ -128,7 +157,7 @@ const App = () => {
             Submit
           </Button>
         </ButtonGroup>
-      </FormFooter>
+      </FormFooter> */}
     </Form>
   );
 };
