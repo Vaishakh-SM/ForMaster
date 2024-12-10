@@ -1,4 +1,4 @@
-function parseEmbeddedJSON(inputString) {
+export function parseEmbeddedJSON(inputString) {
   try {
     // Extract JSON-like substring using a regular expression
     const jsonMatch = inputString.match(/{[\s\S]*}/);

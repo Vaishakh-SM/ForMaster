@@ -52,6 +52,7 @@ modules:
 
         isRequired (boolean)
         Output format:
+        json
         [
           {
             "component": "ComponentName",
@@ -69,6 +70,7 @@ modules:
         Know how that technology has helped improve development time.
         Choose their satisfaction level from 0 to 10 with the team and its processes.
         Example Output:
+        json
         [
           {
             "component": "Select",
@@ -100,7 +102,7 @@ modules:
           }
         ]
 
-        Important NOTE: Only OUTPUT THE FINAL JSON AND NOTHING ELSE !!!
+        Important NOTE: Only OUTPUT THE FINAL JSON with json at the start AND NOTHING ELSE !!!
   function:
     - key: resolver
       handler: index.handler
